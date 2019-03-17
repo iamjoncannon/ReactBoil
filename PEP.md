@@ -1,5 +1,5 @@
 
-Never Write React Boilerplate Ever Again
+# Never Write React Boilerplate Ever Again
 
 Modern state management libraries like React and Redux are extremely powerful solutions for building front-end applications, but come with some significant pain points with respect to the amount of boilerplate code required for each library to compile and run.  Between Webpack, Babel, tracking various dependencies, component definitions, component mounting, component lifecycles, and all the related connection code, "This is my React Hello World" has been a running joke/meme/frustration that has grown alongside the popularity of the framework. Indeed, with the release of React Hooks, which explicitly aims to reduce component complexity, "the boilerplate problem" appears to be influencing the evolution of the framework itself.
 
@@ -7,11 +7,11 @@ Borrowing from the Angular ecosystem, which has an officially maintained and ext
 
 Whats more, while it provides a kind of 'command line' solution to one set of problems- initializing a React application- it doesn't necessarily solve another set of problems- writing the application itself. Class components, stateless functional components, life-cycle methods, and now other, advanced functional/hook components- React's boilerplate requirements do not end after hello world is achieved.  One solution which I have used is the "React ES6 Snippets" library, which I like, but grew frustrated at during the third or fourth hour of trying to edit the Sublime codebase.
 
-So, using Node.js and npm, lets build our own CLI that will have methods to generate the required configuration files- Webpack, Babel, package.json, etc- as well as methods to generate some useful component code. This will give us immediate the hello world of CRA without sacrificing flexiblility, so that when we want to tweak our template, or the next time Facebook updates React, we can iterate on the code as we like. 
+So, using Node.js and npm, lets build our own CLI that will have methods to access and edit the required configuration files- Webpack, Babel, package.json, etc- as well as methods to generate some useful component code. This will give us the immediate hello world of CRA without sacrificing flexiblility, so that when we want to tweak our template, or the next time Facebook updates React, we can iterate on the code as we like. 
 
 Sound good? Lets get started.
 
-First step: google "react boilerplate medium" and copy the code from the first thing that pops up. Just kidding! I'll do that for you in a bit, but since we're not just making some boilerplate, but making an application that itself will write source code files, the first thing we need to do is initialize an empty project.
+First step: google "react boilerplate medium" and copy the code from the first thing that pops up. Just kidding! I'll do that for you in a bit, but since we're not just making some boilerplate, but making a CLI that will write source code files, the first thing we need to do is set up our CLI.
 
 Do:
 
@@ -20,7 +20,7 @@ mkdir react-boiler
 npm init -y
 ```
 
-So, what do we want? We want to be able to call the command line and generate a project scaffold: folders, connection code, and all the boilerplate files that a modern React requires inserted into the proper folders. Ideally, we would run our custom bash command, something like "scaffold," then "npm run start-dev," and everything would be ready to go, just like CRA.
+So, what do we want? We want to be able to call the command line and generate a project scaffold: folders, connection code, and all the boilerplate files that a modern React requires inserted into the proper folders. Ideally, we would run our bash command, something like "scaffold," then "npm run start-dev," and everything would be ready to go, just like CRA.
 
 So, first things first. In order to make a command available in Bash, we need to install this package globally, and have npm add the command to its "/bin" directory inside the shell PATH. 
 
@@ -63,7 +63,7 @@ Put a console log inside cli.js, then call 'react' in the command line, and test
 
 Its working?  I bet at some point you've wondered how other packages like nodemon get hoisted to run globally from the command line. This is one way. Pretty cool right?
 
-So before we write configuration files, we will want node to create our project folders. 
+So before we write configuration files, we will want node to create our project template. 
 
 What if node could run bash commands like "mkdir"? That's sometimes called "shelling out," and there are several node methods we can use to do this. We're going to use "spawn," because that sounds cooler than the other shell out methods. 
 
@@ -83,17 +83,14 @@ We're going to shell out a few times, so lets make a helper method:
 ```js
 const shell = (command) => {
 
-  let myProcess = spawn(command, {shell: true, 
-                                  cwd: process.cwd(), 
-                                  stdio: 'inherit' }
-                        )
-  return myProcess
+  spawn(command, {shell: true, 
+                  cwd: process.cwd()
+                 }
+        )
 }
 ````
 
-Now, our shell() method will run any command we pass to it in bash, including "mkdir." 
-
-What are those other lines doing? Since we want to operate on other folders on our machine, we're going to set spawn's working directory as "cwd()."  Next, "stdio: inherit" will let any node instances we create log to the console (without having to do more complicated data configuration). Finally, shell() will return a process object that exposes a method we'll need in a second. 
+Now, our shell() method will run any command we pass to it in bash. Since we want to operate on other folders on our machine, we're going to set spawn's working directory as "cwd()."
 
 Now we can program "react scaffold" to make a file directory like this:
 
@@ -101,16 +98,24 @@ Now we can program "react scaffold" to make a file directory like this:
 
 if(command === 'scaffold'){
 
-  let makeDirectory = shell('mkdir app app/components public')
-
+  let makeDirectory = shell('mkdir src')
 }
 ````
 
-Call "react scaffold" in Bash, and you should see a few folders pop up. 
+Call "react scaffold" in Bash, and you should see a src folder pop up. 
 
+Now that we have a src code folder, lets write the configuration files in the other two dozen Medium articles about React boilerplate: webpack, babelrc, and the gigantic package.json- as well as the components of a React web app: index.html and a js entry point like main.js. 
 
+And put this these in a folder called "src," since they're really the boilerplate source code for our upcoming projects.
 
-Webpack webpack.config.js
+```bash
+mkdir src src/public src/app
+touch src/webpack.config.js src/babelrc src/package.json src/server.js src/public/index.html src/public/style.css src/app/main.js 
+
+```
+
+Inside the webpack config file:
+
 ```js
 const { resolve } = require('path')
 
@@ -145,30 +150,32 @@ module.exports = {
 }
 ```
 
+Inside the babel config file:
 
-Babel .babelrc
-
-```.json
+```json
 {
   "presets": ["react", "env", "stage-2"]
 }
 ```
 
-Honestly...I don't really remember what these mean. Something with babel presets?  If you want, google "babelrc medium" and I'm sure whatever the first result is will tell you. Let me know though! Seems important. Also pretty sure it will break at some point so... you should figure that out. 
-
-Moving on! 
-
-package.json
+Inside the package.json: 
 
 ```json
-"scripts": {
+{
+  "name": "",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app/main.js",
+  "scripts": {
     "start-dev": "npm run build-watch & npm run start-server",
     "start-server": "nodemon -L --watch server main.js -e html,js,css",
     "build-watch": "webpack -w",
     "start": "echo 'Running server for production - developers, use npm run start:dev for development' && node main"
   },
-...
-"dependencies": {
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
     "axios": "^0.18.0",
     "body-parser": "^1.18.2",
     "express": "^4.14.0",
@@ -191,21 +198,118 @@ package.json
     "babel-preset-stage-2": "^6.24.1",
     "css-loader": "^0.28.11",
     "eslint": "^4.19.1",
-    "eslint-config-fullstack": "^5.0.0",
     "eslint-plugin-react": "^7.8.2",
     "style-loader": "^0.21.0",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.2.3"
   }
+}
 ```
 
-index.html
+Inside index.html: 
+```HTML 
+<!doctype html>
+<html>
+  <head>
+    <title></title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
 
+    <div id="root"></div>
+    <script async defer src="/bundle.js"></script>    
+  
+  </body>
+</html> 
+```
 
-react root component
+Inside main.js:
+```js
+import React from 'react'
+import { render } from 'react-dom'
 
+const Root = () => {
 
-Finally, lets make a method that will allow us to iterate on this codebase quickly, so we can update our next project.  
+  return ( 
+    <div> 
+    Goodbye World! 
+    </div>
+  )
+}
 
+render(
+   <Root />,
+  document.getElementById('root')
+);
+````
 
-Finally, while we're at it, wouldn't it be cool if we could just pull up a bunch of random React related code in the command line so we wouldn't have to remember the last time we used it?  like remember that one React router thing we did one time?  Yeah that thing, how did I do that again?  Oh yeah just run "react router list" and >>>
+So now that we have our source project, how are we going to automate over copying and pasting this into a new set of files in our next project? 
+
+Returning to our cli.js file, re-write our scaffold conditional:
+
+```js
+if(command === 'scaffold'){
+
+  console.log(process.cwd())
+
+}
+```
+
+Make sure you've navigated to the project folder containing the src folder, and run "react scaffold." 
+
+Ok...you could also just:
+
+```bash
+pwd
+```
+We need the exact path to the "project" file.
+
+Replace the console log, copy and paste the file path along with the following shell method:
+
+```js
+
+let sourceDirectory = '/Users/...' // whatever the path is
+
+if(command === 'scaffold'){
+
+  shell(`cp -a ${sourceDirectory}/. . `)
+}
+```
+
+Breaking down the shell command, '-a' is a recursive option, which tells Bash to access the entire subfolder, which is why "src" needed to be inside another folder called "project." The first argument is the source folder, which is what we defined as the source directory, and the second argument is '.', or the current working directory we defined in our shell method. 
+
+Now, create and navigate into a test directory, then run "react scaffold". The contents of the src folder should populate. 
+
+Now run: 
+```bash
+$ npm i
+$ npm run build
+```
+
+This will run webpack, which should hash a bundled js file without any issues.
+
+Finally, lets make a method that will allow us to iterate on this codebase quickly, so we can update our next project.
+
+Based on the fact that we've stored an exact file path to the source directory in our cli.js file, its pretty simple to make a shortcut command to edit the entire folder in our code editor.
+
+```js
+
+let sourceDirectory = '/Users/...' // whatever the path is
+
+if(command === 'scaffold'){
+
+  shell(`cp -a ${sourceDirectory}/. . `)
+}
+
+if(command === 'edit'){
+
+  shell(`subl ${pwd}`)
+}
+
+```
+
+This will automatically launch the folder in Sublime (the editor I use), and for VSC Code it would just be "code"
+
+Mozel tov internet friend. Does this all seem a bit basic?  Think about what we just did: now you have a hello world React app that you can summon from the command line, that you can completely control and customize, and that you can easily iterate over and improve with each project.  
+
+You want to magically summon a full GraphQL API with your hello world React app? Just add it into the src file, or create separate projects and configure them with separate command line calls. Want to configure an entire Redux store with React Router and Semantic UI? Just add it into the src file.

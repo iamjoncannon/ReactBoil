@@ -7,17 +7,21 @@ let arg1 = input[3]
 
 const shell = (command) => {
 
-	let myProcess = spawn(command, {shell: true, 
+	spawn(command, {shell: true, 
 					cwd: process.cwd(), 
 					stdio: 'inherit' }
-				)
+		 )
 
-	return myProcess
 }
 
+let pwd = '/Users/jonathancannon/FSA/senior/PEP/react-boiler/project'
+
 if(command === 'scaffold'){
-// console.log('hitting')
 
-  shell('mkdir app app/components public')
+	shell(`cp -a ${pwd}/. .`)
+}
 
+if(command === 'edit'){
+
+	shell(`subl ${pwd}`)
 }
