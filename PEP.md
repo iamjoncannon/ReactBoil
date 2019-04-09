@@ -5,15 +5,15 @@ Modern state management libraries like React and Redux are extremely powerful to
 
 Borrowing from the Angular ecosystem, which has an officially maintained and extensive CLI, in 2016 the React team released "create-react-app" ("CRA") a library which allowed developers to generate entire React projects, and drove wider adoption of the framework despite its verbosity. Yet, as projects grow, and developers become more experienced in the framework, CRA begins to create another set of problems around its easy of use, which forces users to trade convenince for a decreased ability to control and configure the underlying packages which power their applications. Around the third minute of the first install, it also becomes clear that CRA is quite "bureaucratic," weighing in at 300 mbs, and no less than two separate servers out of the box, whose configuration, side effects, and limitations take time and energy to disentangle. Talk to a someone with React experience, and they will almost all have some sort of rant related to debugging CRA. It does come with a cool spinning icon when you boot the landing page though! 
 
-Whats more, while it provides a kind of 'command line' solution to one set of problems- initializing a React application- it doesn't necessarily solve another set of problems- writing the application itself. Class components, stateless functional components, life-cycle methods, and now other, advanced functional/hook components- React's boilerplate requirements do not end after hello world is achieved.  One solution which I have used is the "React ES6 Snippets" library, which I like, but grew frustrated at during the third or fourth hour of trying to edit the Sublime codebase.
+Whats more, while it provides a kind of 'command line' solution to one set of problems- initializing a React application- it doesn't necessarily solve another set of problems- writing the application itself. Class components, stateless functional components, life-cycle methods, components connected to a Redux store, and now other, advanced functional/hook components- React's boilerplate requirements do not end after hello world is achieved.  One solution which I have used is the "React ES6 Snippets" library, which I like, but grew frustrated at during the third or fourth hour of trying to edit the Sublime codebase.
 
-So, using Node.js and npm, lets build our own CLI that will have methods to access and edit the required configuration files- Webpack, Babel, package.json, etc- as well as methods to generate some useful component files. This will give us the immediate hello world of CRA and the immediate boilerate of snippets without sacrificing flexiblility, so that when we want to tweak our templates, or the next time React gets updated, we can iterate on the code as we like, easily.
+So, using Node.js and npm, lets build our own CLI that will have methods to summon the required configuration files- Webpack, Babel, package.json, etc- as well as methods to generate some useful component files. This will give us the immediate hello world of CRA and the immediate boilerate of snippets without sacrificing flexiblility, so that when we want to tweak our templates, or the next time React gets updated, we can iterate on the code as we like, quickly and easily.
 
 Sound good? Lets get started.
 
 First step: google "react boilerplate medium" and copy the code from the first thing that pops up. Just kidding! I'll do that for you in a bit. 
 
-Since we're not just making some boilerplate, but making a CLI that will generate source code files, the first thing we need to do is set up our CLI project.
+Since we're not just making some boilerplate, but making a CLI that will generate source code files, the first thing we need to do is set up a script thats available from the command line.
 
 Do:
 
@@ -29,14 +29,14 @@ So, first things first. In order to make a command available in Bash, we need to
 
 <digression> 
 
-Now (some of you are probably thinking) we could also do this by inserting an alias inside our Bash profile. In order to build out some of the other functionality, we would have to code the rest of the alias functions in Bash, which is (I've been told) a C abstraction, which most of you don't know (and neither do I really). I think keeping our code inside the Node/npm/JS ecosystem is the best strategy, and will allow your boilerplate to grow and get customized easily over time.  
+Now (some of you are probably thinking) we could also do this by inserting an alias inside our Bash profile. In order to build out some of the other functionality, we would have to code the rest of the alias functions in Bash, which is (I've been told) a C abstraction, which most of you don't know (and neither do I). I think keeping our code inside the Node/npm/JS ecosystem is the best strategy, and will allow your boilerplate to grow and get customized easily over time.  
 
 </digression>
 
 Anyway, lets create a the file for the scripts we want to run when we call our Bash commands:
 
 ```bash
-$: touch cli.js
+touch cli.js
 ```
 
 Then, in the package.json file generated by the npm init call, insert the following under "license":
@@ -52,13 +52,13 @@ Since I don't have "react" in my PATH namespace, I'm just going to have our libr
 Run the command to install our package globally: 
 
 ```bash
-$: npm install -g ./
+npm install -g ./
 ```
 
 To confirm that 'react' was added to node's bin directory, call:
 
 ```bash
-$: which react
+which react
 ```
 Bash should output node's global module directory in your PATH.
 
@@ -110,18 +110,20 @@ if(command === 'scaffold'){
 
 Now do:
 ```Bash
-$: react scaffold 
+react scaffold 
 ```
 
 You should see a src folder pop up. Ok you could have called mkdir in Bash. But that was kind of fun, right?
 
-Anyway, now that we have a src code folder, lets write the configuration files in the other two dozen Medium articles about React boilerplate: webpack, babelrc, and the gigantic package.json- as well as the components of a React web app: index.html and a js entry point like main.js. 
+Anyway, now that we have a src code folder, lets write the configuration files in the other two dozen Medium articles about React boilerplate: webpack, babelrc, and the gigantic package.json- as well as the components of a React web app: index.html, a js entry point like main.js, and a basic Express dev server. 
 
 ```bash
 mkdir src/public src/app
 touch src/webpack.config.js src/babelrc src/package.json src/server.js src/public/index.html src/public/style.css src/app/main.js 
 
 ```
+
+Here's the part where you copy and paste all the boilerplate code.
 
 Inside the webpack config file:
 
@@ -159,7 +161,7 @@ module.exports = {
 }
 ```
 
-Inside the babel config file:
+Inside the babel config file (I always forget this one):
 
 ```json
 {
@@ -215,6 +217,8 @@ Inside the package.json:
 }
 
 ```
+
+I left in Redux. 
 
 Inside index.html: 
 ```HTML 
@@ -277,7 +281,7 @@ app.listen(PORT, () => console.log(`serving on port ${PORT}`))
 
 ```
 
-So now that we have our source project, how are we going to automate over transporting this into a new set of files in our next project? 
+So now that we have our source project, how are we going to quickly transport this into a new set of files in our next project? 
 
 Returning to our cli.js file, re-write our scaffold conditional:
 
@@ -298,11 +302,14 @@ pwd
 ```
 We just need the exact system path to the "project" file.
 
-Replace the console log, insert the file path along with the following shell method:
+Replace the console log, insert the file path along with the following shell call:
 
 ```js
+const { spawn } = require('child_process')
+let input = process.argv
+let command = input[2]
 
-let sourceDirectory = '/Users/...' // whatever the path is
+let sourceDirectory = '/Users/...' // the file directory location
 
 if(command === 'scaffold'){
 
@@ -310,19 +317,19 @@ if(command === 'scaffold'){
 }
 ```
 
-Breaking down the shell command, '-a' tells Bash to access the subfolder recursively. The first argument is the source folder, which is what we defined as the source directory, and the second cp argument is the destination directory, '.', or the directory that we would be in when we make the 'react scaffold' call. This was why we had to pass process.cwd() to our helper shell function. 
+Breaking down the shell command, '-a' tells Bash to access the subfolder recursively. The first argument is the source folder, which is what we defined as the source directory, and the second cp argument is the destination directory, '.', or the directory that we would be in when we make the 'react scaffold' call. This was why we had to pass process.cwd() to our helper shell function above, and the entire reason why this will save you time in the future. No need to dig through your directories and find your last project, or that thing you found on Medium that one time, or the code from that Udemy course you did a few months ago. Just run the command and Bash will summon your template.  
 
-Now, create and navigate into a test directory, then run "react scaffold". The contents of the src folder should populate. 
+Create and navigate into a test directory, then run "react scaffold". The contents of the src folder should populate. 
 
-Inside src, now run: 
+Inside src, do: 
 ```bash
-$ npm i
-$ npm run start-dev
+npm i
+npm run start-dev
 ```
 
 This will run webpack in watch mode, which should hash the bundled js file without any issues, then boot our Express development server. Navigate to localhost:1337, and we have our React Hello World.
 
-Ok so this was pretty straightforward. We made some files and did a Bash trick to dump them where we wanted them. 
+So this was pretty straightforward. We made some files and did a Bash trick to dump them where we wanted them. 
 
 Lets do something a bit more complex. What if we could automatically generate multiple component files from one command line call?
 
@@ -331,7 +338,7 @@ Something like:
 
 react make cont Navbar pres Widget Link Dropdown
 ```
-So what do we want: 
+So what do we want:  
 
 1) we want one component called Navbar, which is a container (aka "class" component, which React Hooks aims to phase out in the next few years) and three "presentational" components (also called "stateless functional components" or "functional components")
 
@@ -339,7 +346,7 @@ So what do we want:
 
 3) we want the files and components to be named what we called them on the command line, so we can not be annoyed by that.
 
-Now, when we copied our scaffold boilerplate, we could leave the content of the files alone because we didn't need to operate on them. Now, we have to take a different approach because we need to used variables inside templates. 
+Now, when we copied our scaffold boilerplate, we could leave the content of the files alone because we didn't need to operate on them. Now, we have to take a different approach because we need to use variables inside templates. 
 
 So, first, lets create two separate templates inside our react-boiler folder:
 
@@ -347,7 +354,7 @@ So, first, lets create two separate templates inside our react-boiler folder:
 touch cont.js pres.js
 ```
 
-Inside cont.js, first copy in a class component. Here's mine: 
+Inside cont.js, first copy what you normally use for class components. Here's mine: 
 
 ```js
 import React from 'react';
@@ -370,7 +377,7 @@ export default class Something extends React.Component {
 
   render() {
 
-    const { } = this.props;
+    const { } = this.props; 
 
     return (
       <div></div>
@@ -386,7 +393,7 @@ import React from 'react';
 
 export default function Something (props){
 
-  const { } = props;
+  const { } = props; // I almost always do this
 
   return (
     <div>
@@ -428,7 +435,7 @@ We wanted to declare a container component called "NavBar" as well as three pres
 react make cont Navbar pres Widget Link Dropdown
 ```
 
-This should output something like:
+This should output:
 
 ```Bash
 [ '/Users/.../.node_modules_global/lib/node_modules/node/bin/node',
@@ -442,59 +449,51 @@ This should output something like:
   'Dropdown' ]
 ```
 
-So we have a one dimensional array, and we need a two dimensional array, with a separate list of "container" and "presentational" component names to feed into the template functions we will write in a moment.
+So we have an array with our information, but we need to sort this array so that we know what container and presentational components we need to make.
 
-Lets write a helper function to sort through process.argv. 
-
-<digression> "Minimist" is an extremely popular package for managing command line input, but I don't think there are actually any array methods (feel free to chime in in the comments, I'd actually like to know if there's an easier way to do this). </digression>
-
-Anway, here's my helper function that will account for all user input:
+Lets write a helper function to sort through process.argv:
 
 ```js
 function sortCompTypes(args){
-  
-  let cont = args.includes('cont') 
-  let pres = args.includes('pres')
 
-  let contInd = args.indexOf('cont')
-  let presInd = args.indexOf('pres')
+  let output = []
 
-  if(cont && pres){
+  let type
 
-    if(cont < pres){
+  for(let i =0; i < args.length; i++){
 
-      return { cont : args.slice(contInd + 1, presInd), 
-             pres : args.slice(presInd + 1) 
-           }
+    if(args[i] === 'cont' || args[i] === 'pres'){
+      type = args[i]
+      continue
     }
-    else{
-
-      return { cont : args.slice(contInd + 1), 
-             pres : args.slice(presInd + 1, contInd) 
-           }
+    if(type){
+      output.push([type, args[i]])
     }
+
   }
 
-  else if(cont){
-
-    return { cont : args.slice(contInd + 1) }
+  if(!output.length){
+    return null
   }
-
-  else if(pres){
-    return { pres : args.slice(presInd + 1) }
+  else{
+    return output
   }
 }
 ```
+This is indeed a for loop, but we can capture chaining component type requests in any order (no for loop shaming).
 
 Now when you call our full "react make" command, it should return an object that looks like this:
 
 ```js
-{ cont: [ 'Navbar' ], pres: [ 'Widget', 'Link', 'Dropdown' ] }
+[ [ 'cont', 'Navbar' ],
+  [ 'pres', 'Widget' ],
+  [ 'pres', 'Link' ],
+  [ 'pres', 'Dropdown' ] ]
 ```
 
-The next piece of the puzzle: lets create two functions that, when we feed them part of our object, will generate component templates.
+The next piece of the puzzle: lets create two functions that, when we feed them the appropriate part of our array, will generate component templates.
 
-Back inside cont.js, we're going to do something that's going to look a little weird at first. Lets turn the code itself into a template literal, inserting the name we processed off the command line as the component name:
+Back inside cont.js, we're going to do something that's going to look a little weird at first. Lets make a function that returns the template code itself as a template literal, inserting the name we processed off the command line as the component name:
 
 ```js
 module.exports = name => {
@@ -553,7 +552,7 @@ Notice we don't indent the template literal itself (otherwise the source code we
 
 Finally, lets put our helper functions, template functions together inside cli.js, writing the strings we created to new files with the same names. 
 
-The function looks like this:
+The cli branch looks like this:
 
 ```js
 // cli.js
@@ -577,56 +576,38 @@ if(command === 'make'){
 
     console.log('no components specified')  
   }
-  
-  if(components.cont){
+  else{
 
-    components.cont.forEach(comp => {
+    components.forEach(comp => {
 
-      try{
+      let payload = comp[0] === 'cont' ? 
+              contComp(comp[1]) : 
+              presComp(comp[1]) ;
 
+      try {
         fs.writeFile(
-              `./app/${comp}.js`,
-              contComp(comp),
+              `./app/${comp[1]}.js`,
+              payload,
               () => {
-                console.log('created container component', comp);
+                let type = comp[0] === 'cont' ? 
+                      'container' : 
+                      'presentational' ;
+                console.log('created ' + type + ' component: ', comp[1]);
               }
             );
       }
       catch(err){
         console.log(err)
       }
-
     })
-  }
-
-  if(components.pres){
-
-    components.pres.forEach(pres => {
-
-      try{
-
-        fs.writeFile(
-              `./app/${pres}.js`,
-              presComp(pres),
-              () => {
-                console.log('created presenational component', pres);
-              }
-            );
-      }
-      catch(err){
-        console.log(err)
-      }
-
-    })
-  }
+  } 
 }
 
 function sortCompTypes(args){ // ...
  
 ```
 
-Breaking down what's happenening in the code above, we import our two template functions at the top as 
-
+Breaking down what's happenening in the code above, we import our two template functions at the top. Inside the "make" conditional branch, we process the command line input with our helper function, then iterate through the two dimensional array, processing it appropriately based on the types we inserted into each index. We then call the fs.writefile method, inserting the component name into the file name in the first argument, and writing the payload from the template function in the second argument.
 
 Now, when we navigate to the src folder and call 
 
@@ -635,9 +616,9 @@ Now, when we navigate to the src folder and call
 react make cont Navbar pres Widget Link Dropdown
 ```
 
-Four component files should populate inside the app folder, titled Navbar.js, Widget.js, Link.js, and Dropdown.js, with the correct boilerplate code written into each.
+...four component files should populate inside the app folder, titled Navbar.js, Widget.js, Link.js, and Dropdown.js, with the correct boilerplate code written into each.
 
-Finally, lets make a Bash command that will allow us to iterate on this codebase quickly, so we can update it for our next project. This one is a lot less complicated. 
+Finally, lets make a Bash command that will allow us to iterate on this codebase quickly, so we can update it for our next project. This one is a lot less complicated (yes, this is just a fancy Bash alias). 
 
 Based on the fact that we've stored an exact file path to the source directory in our cli.js file, its pretty simple to make a shortcut command to edit the entire template folder in our code editor.
 
@@ -671,16 +652,16 @@ if(command === 'edit'){
 
 ```
 
-Now, if we call:
+Now, if we call
 
 ```Bash
 react edit
 ```
 
-our cli script will automatically launch the template folder in Sublime (the editor I use). For VSC Code the shell argument would just be "code" instead of "subl."
+our cli script will automatically launch the template folder in Sublime. For VSC Code the shell argument would just be "code" instead of "subl." 
 
-Mozel tov internet friend. Now you have a hello world React app that you can summon from the command line, that you can completely control and customize, that will save you lots of time searching for and/or writing and/or debugging annoying boilerplate code, and that you can easily iterate over and improve with each project.  
+Mozel tov internet friend! Now you have a hello world React app that you can summon from the command line, that you can completely control and customize, that will save you lots of time searching for and/or writing and/or debugging annoying boilerplate code, and that you can easily iterate over and improve with each project.  
 
-You want to magically summon a full GraphQL API with your hello world React app? Just add it into the src file, or create separate projects, or project parts, and configure them with separate command line calls. Want to configure an entire Redux scaffold with React Router, components controlled by the Redux store via the connect() method, Semantic UI, and even more buzzwords? Just add it into the src file. 
+You want to magically summon a full GraphQL API with your hello world React app? Or print out a fully connected React components for your Redux project? Just add it into the src file, or create separate projects, or project parts, and configure them with separate command line calls. Want to configure an entire Redux scaffold with React Router, components controlled by the Redux store via the connect() method, Semantic UI, and Even. More. Buzzwords?!?!? Just add it into the src file. 
 
-Want to make "Goodbye World" spin when your server boots? 
+Want to make "Goodbye World" spin when your server boots? :p

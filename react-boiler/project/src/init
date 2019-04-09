@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+git init
+
+npm init -y
+
+createdb $1
+
+npm i
+
+npm run start-dev
+
