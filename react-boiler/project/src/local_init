@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+git init
+
+npm init -y
+
+createdb $1 # create postgres database with project name
+
+npm i
+
+echo '"npm run start-dev" to launch local server'

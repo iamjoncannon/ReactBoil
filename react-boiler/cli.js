@@ -26,11 +26,11 @@ if(command === 'scaffold'){
 			let second = shell(`mv src ${process.argv[3]}`)
 
 			second.on('exit', ()=>{
-				let third = shell(`chmod +x ./${process.argv[3]}/init`)
+				let third = shell(`chmod +x ./${process.argv[3]}/local_init`)
 				
 				third.on('exit', ()=>{
 
-					spawn(`./init ${process.argv[3]}`, {shell: true, 
+					spawn(`./local_init ${process.argv[3]}`, {shell: true, 
 									cwd: `${process.cwd()}/${process.argv[3]}`, 
 									stdio: 'inherit' }
 					)
@@ -85,6 +85,11 @@ if(command === 'edit'){
 if(command === 'help'){
 
 	console.log(require('./help'))
+}
+
+if(command === 'deploy'){
+
+	shell(`cp -r ${sourceDirect + '/src/deploy'} .`)
 }
 
 function sortCompTypes(args){

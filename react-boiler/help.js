@@ -1,5 +1,5 @@
 module.exports = `
-Boiler: Boilerplate Library for Generating Blank Project Templates
+my boilerplate generator so I don't have to think about initializing projects anymore
 
 boiler scaffold <folder name> 	creates blank project
 
@@ -11,6 +11,8 @@ boiler make <react component type> <component names>
 
 	these can be chained...
 	eg "boiler make pres One Two cont Three Four conn Five Six" 
+
+boiler deploy 	copies just the deployment toolchain
 
 boiler edit 	launches template in Sublime
 `

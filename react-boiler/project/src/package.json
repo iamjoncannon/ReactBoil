@@ -1,13 +1,19 @@
 {
   "name": "",
+  "publicDNS" : "ec2-54-69-228-6.us-west-2.compute.amazonaws.com",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
   "scripts": {
+    "dep-connect" : "cd ~/.ssh & ssh -i ~/.ssh/esee.pem ubuntu@$npm_package_publicDNS",
+    "dep-install" : "./deploy/install ubuntu@$npm_package_publicDNS",
+    "dep-nginx" : "chmod +x ./deploy/nginxConfig & ./deploy/nginxConfig",
+    "deploy" : "pm2 deploy ecosystem.config.js production",
     "start-dev": "npm run build & npm run start-server",
     "start-server": "nodemon -L --watch server.js -e html,js,css",
     "build": "webpack -w",
-    "start": "echo 'Running server for production - we're using npm run start-dev for development folks' && node server.js"
+    "start": "echo 'Running production server' && node server.js",
+    "site":"open http://$npm_package_publicDNS"
   },
   "keywords": [],
   "author": "",
