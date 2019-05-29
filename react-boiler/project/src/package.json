@@ -1,19 +1,19 @@
 {
   "name": "",
-  "publicDNS" : "ec2-54-69-228-6.us-west-2.compute.amazonaws.com",
   "version": "1.0.0",
-  "description": "",
   "main": "main.js",
   "scripts": {
-    "dep-connect" : "cd ~/.ssh & ssh -i ~/.ssh/esee.pem ubuntu@$npm_package_publicDNS",
-    "dep-install" : "./deploy/install ubuntu@$npm_package_publicDNS",
-    "dep-nginx" : "chmod +x ./deploy/nginxConfig & ./deploy/nginxConfig",
-    "deploy" : "pm2 deploy ecosystem.config.js production",
-    "start-dev": "npm run build & npm run start-server",
-    "start-server": "nodemon -L --watch server.js -e html,js,css",
-    "build": "webpack -w",
+    "sh": "cd ~/.ssh & ssh -i $key ubuntu@$addy",
+    "dep-install": "chmod +x ./deploy/install && ./deploy/install ubuntu@$addy",
+    "dep-nginx": "chmod +x ./deploy/nginxConfig && ./deploy/nginxConfig",
+    "deploy": "addy=$addy key=$key pm2 deploy ecosystem.config.js production",
+    "start-dev": "local & npm run build & npm run start-server",
+    "start-server": "nodemon -L --watch main.js -e html,js,css",
+    "build": "webpack -w --progress",
     "start": "echo 'Running production server' && node server.js",
-    "site":"open http://$npm_package_publicDNS"
+    "site":"open http://$addy",
+    "compile": "NODE_ENV=production webpack -p --progress",
+    "install-lazy": "npm install webpack@4.28.4 && npm install acorn-dynamic-import@4.0.0 && npm update acorn --depth 20 && npm dedupe"
   },
   "keywords": [],
   "author": "",
@@ -44,8 +44,10 @@
     "css-loader": "^0.28.11",
     "eslint": "^4.19.1",
     "eslint-plugin-react": "^7.8.2",
+    "pm2": "^3.5.0",
     "style-loader": "^0.21.0",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.2.3"
-  }
+  },
+  "description": ""
 }

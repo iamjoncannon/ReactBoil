@@ -40,7 +40,7 @@ if(command === 'scaffold'){
 	}
 }
 
-if(command === 'make'){
+if(command === 'make' || command === 'm'){
 
 	let components = sortCompTypes(input)
 
@@ -62,7 +62,7 @@ if(command === 'make'){
 
 			try {
 				fs.writeFile(
-			        `./${comp[1]}.js`,
+			        `./app/components/${comp[1]}.js`,
 			        payload,
 			        () => {
 			        	
@@ -79,7 +79,7 @@ if(command === 'make'){
 
 if(command === 'edit'){
 
-	shell(`subl ${sourceDirect}`)
+	shell(`subl ${__dirname}`)
 }
 
 if(command === 'help'){
@@ -90,6 +90,7 @@ if(command === 'help'){
 if(command === 'deploy'){
 
 	shell(`cp -r ${sourceDirect + '/src/deploy'} .`)
+	shell(`cp ${sourceDirect + '/src/ecosystem.config.js'} .`)
 }
 
 function sortCompTypes(args){
